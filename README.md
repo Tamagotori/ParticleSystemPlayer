@@ -1,0 +1,2 @@
+# ParticleSystemPlayer
+ParticleSystemの再生制御用コンポーネント
