@@ -16,15 +16,17 @@ namespace tamagotori.lib
 
         double m_currentTime;
         bool m_isPlaying = false;
+        bool m_isPlayCurrentFrame = false;
         PhaseData m_currentPhase;
         List<ParticleSystem> m_playingParticleList = new List<ParticleSystem>();
 
-        void Start()
+        void OnEnable()
         {
-            if (!string.IsNullOrEmpty(startPlayPhaseName))
+            if (!string.IsNullOrEmpty(startPlayPhaseName) && !m_isPlayCurrentFrame)
             {
                 Play(startPlayPhaseName);
             }
+            m_isPlayCurrentFrame = false;
         }
 
         // Update is called once per frame
@@ -76,6 +78,7 @@ namespace tamagotori.lib
             m_currentPhase = phaseData;
             m_currentTime = startTime;
             m_isPlaying = true;
+            m_isPlayCurrentFrame = true;
             InitStartParticles();
             ClearOtherPhaseParticles();
             UpdateParticleStatus();
@@ -96,13 +99,6 @@ namespace tamagotori.lib
         {
             if (m_isPlaying == false) return;
             m_currentTime += Time.deltaTime;
-        }
-
-        void Init()
-        {
-            if (m_currentPhase.startParticleList == null) m_currentPhase.startParticleList = new List<ParticleData>();
-            if (m_currentPhase.stopParticleList == null) m_currentPhase.stopParticleList = new List<ParticleData>();
-            if (m_currentPhase.clearParticleList == null) m_currentPhase.clearParticleList = new List<ParticleData>();
         }
 
         void InitStartParticles()
@@ -156,10 +152,10 @@ namespace tamagotori.lib
         void PlayParticle(ParticleData data)
         {
             data.particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            data.particle.Play(true);
             //最初は0fにしておかないとサブエミッター系が正常に動かない
-            data.particle.Simulate(0f, true, false);
+            data.particle.Simulate(0f, true, true);
             data.particle.Simulate((float)m_currentTime - data.executeDelay, true, false);
+            data.particle.Play(true);
             AddPlayingParticle(data.particle);
         }
 
